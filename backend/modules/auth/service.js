@@ -1,66 +1,123 @@
-const bcrypt = require("bcryptjs");
+const bcrypt = require("bcrypt");
 const jwt = require("jsonwebtoken");
 const env = require("../../core/config/env");
-const authRepository = require("./repository");
+const repository = require("./repository");
 
-function createError(message, statusCode) {
+function createHttpError(statusCode, message) {
   const error = new Error(message);
   error.statusCode = statusCode;
   return error;
 }
 
-async function login(credentials) {
-  const identifier = String(
-    credentials.identifier || credentials.email || credentials.badgeNumber || ""
-  ).trim();
-  const password = String(credentials.password || "");
-
-  if (!identifier || !password) {
-    throw createError("identifier and password are required", 400);
+function normalizeText(value) {
+  if (typeof value !== "string") {
+    return "";
   }
+  return value.trim();
+}
 
-  const officer = await authRepository.findOfficerByIdentifier(identifier);
-  if (!officer) {
-    throw createError("Invalid credentials", 401);
-  }
-
-  if (officer.isActive === 0) {
-    throw createError("Officer account is inactive", 403);
-  }
-
-  const validPassword = await bcrypt.compare(password, officer.passwordHash || "");
-  if (!validPassword) {
-    throw createError("Invalid credentials", 401);
-  }
-
-  const tokenPayload = {
-    officerId: officer.officerId,
-    role: officer.role,
-    stationId: officer.stationId,
-    fullName: officer.fullName,
+function throwMissingFieldsError(fields, data) {
+  const error = createHttpError(400, `Missing required field(s): ${fields.join(", ")}`);
+  error.details = {
+    missingFields: fields,
+    receivedKeys: Object.keys(data || {}),
+    hint: "Send a JSON body with Content-Type: application/json",
   };
+  throw error;
+}
 
-  const accessToken = jwt.sign(tokenPayload, env.jwtSecret, {
-    expiresIn: env.jwtExpiresIn,
-  });
+async function registerOfficer(data = {}) {
+  try {
+    const name = normalizeText(data.name);
+    const email = normalizeText(data.email).toLowerCase();
+    const password = normalizeText(data.password);
+    const role = normalizeText(data.role);
 
-  await authRepository.updateLastLogin(officer.officerId);
+    const missingFields = [];
+    if (!name) missingFields.push("name");
+    if (!email) missingFields.push("email");
+    if (!password) missingFields.push("password");
+    if (!role) missingFields.push("role");
 
-  return {
-    accessToken,
-    tokenType: "Bearer",
-    expiresIn: env.jwtExpiresIn,
-    officer: {
-      officerId: officer.officerId,
-      fullName: officer.fullName,
-      email: officer.email,
-      badgeNumber: officer.badgeNumber,
-      role: officer.role,
-      stationId: officer.stationId,
-    },
-  };
+    if (missingFields.length > 0) {
+      throwMissingFieldsError(missingFields, data);
+    }
+
+    const existing = await repository.findOfficerByEmail(email);
+
+    if (existing) {
+      throw createHttpError(409, "Officer already exists");
+    }
+
+    const hashedPassword = await bcrypt.hash(password, 10);
+
+    const officerId = await repository.createOfficer({
+      name,
+      email,
+      password_hash: hashedPassword,
+      role,
+    });
+
+    return { officerId };
+  } catch (error) {
+    if (!error.statusCode) {
+      error.statusCode = 500;
+    }
+    throw error;
+  }
+}
+
+async function loginOfficer(data = {}) {
+  try {
+    const email = normalizeText(data.email).toLowerCase();
+    const password = normalizeText(data.password);
+
+    const missingFields = [];
+    if (!email) missingFields.push("email");
+    if (!password) missingFields.push("password");
+
+    if (missingFields.length > 0) {
+      throwMissingFieldsError(missingFields, data);
+    }
+
+    const officer = await repository.findOfficerByEmail(email);
+
+    if (!officer || !officer.password_hash) {
+      throw createHttpError(401, "Invalid email or password");
+    }
+
+    const validPassword = await bcrypt.compare(password, officer.password_hash);
+
+    if (!validPassword) {
+      throw createHttpError(401, "Invalid email or password");
+    }
+
+    const token = jwt.sign(
+      {
+        officer_id: officer.officer_id,
+        role: officer.role,
+      },
+      env.jwt.secret,
+      { expiresIn: env.jwt.expiresIn }
+    );
+
+    return {
+      token,
+      officer: {
+        id: officer.officer_id,
+        name: officer.name,
+        role: officer.role,
+      },
+    };
+  } catch (error) {
+    if (!error.statusCode) {
+      error.statusCode = 500;
+    }
+    throw error;
+  }
 }
 
 module.exports = {
-  login,
+  registerOfficer,
+  loginOfficer,
 };

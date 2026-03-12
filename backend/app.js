@@ -6,11 +6,16 @@ const { notFoundMiddleware, errorMiddleware } = require("./core/middleware/error
 
 const app = express();
 
-// App-level middleware is intentionally thin: transport concerns only.
+/*
+Transport middleware
+*/
 app.use(cors());
-app.use(express.json({ limit: "2mb" }));
+app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
+/*
+Health check
+*/
 app.get("/health", (_req, res) => {
   return success(res, {
     message: "CCMS backend is healthy",
@@ -18,8 +23,14 @@ app.get("/health", (_req, res) => {
   });
 });
 
+/*
+API routes
+*/
 app.use("/api", routes);
 
+/*
+Error handling
+*/
 app.use(notFoundMiddleware);
 app.use(errorMiddleware);
 

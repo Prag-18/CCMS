@@ -1,4 +1,4 @@
-const { query } = require("../../core/config/db");
+const { db } = require("../../core/config/db");
 
 async function createCase(connection, payload) {
   const sql = `
@@ -80,7 +80,7 @@ async function findAll(filters) {
     ORDER BY cf.created_at DESC
   `;
 
-  const [rows] = await query(sql, params);
+  const [rows] = await db.query(sql, params);
   return rows;
 }
 
@@ -102,8 +102,20 @@ async function findById(caseId) {
     LIMIT 1
   `;
 
-  const [rows] = await query(sql, [caseId]);
+  const [rows] = await db.query(sql, [caseId]);
   return rows[0] || null;
+}
+
+async function crimeExists(crimeId) {
+  const sql = `
+    SELECT crime_id
+    FROM Crime
+    WHERE crime_id = ?
+    LIMIT 1
+  `;
+
+  const [rows] = await db.query(sql, [crimeId]);
+  return Boolean(rows[0]);
 }
 
 async function updateCase(connection, caseId, payload) {
@@ -152,7 +164,7 @@ async function findTimeline(caseId) {
     WHERE case_id = ?
     ORDER BY created_at DESC
   `;
-  const [rows] = await query(sql, [caseId]);
+  const [rows] = await db.query(sql, [caseId]);
   return rows;
 }
 
@@ -161,6 +173,7 @@ module.exports = {
   addCaseActivity,
   findAll,
   findById,
+  crimeExists,
   updateCase,
   findTimeline,
 };

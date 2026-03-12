@@ -1,24 +1,40 @@
 const jwt = require("jsonwebtoken");
 const env = require("../config/env");
 
-function authMiddleware(req, _res, next) {
-  const authHeader = req.headers.authorization || "";
-  const [scheme, token] = authHeader.split(" ");
+function authMiddleware(req, res, next) {
 
-  if (scheme !== "Bearer" || !token) {
-    const error = new Error("Unauthorized");
+  const authHeader = req.headers.authorization;
+
+  if (!authHeader) {
+    const error = new Error("Authorization header missing");
     error.statusCode = 401;
     return next(error);
   }
 
+  const parts = authHeader.split(" ");
+
+  if (parts.length !== 2 || parts[0] !== "Bearer") {
+    const error = new Error("Invalid authorization format");
+    error.statusCode = 401;
+    return next(error);
+  }
+
+  const token = parts[1];
+
   try {
-    const payload = jwt.verify(token, env.jwtSecret);
-    req.user = payload;
-    return next();
-  } catch (_error) {
+
+    const decoded = jwt.verify(token, env.jwt.secret);
+
+    req.user = decoded;
+
+    next();
+
+  } catch (err) {
+
     const error = new Error("Invalid or expired token");
     error.statusCode = 401;
     return next(error);
+
   }
 }
 

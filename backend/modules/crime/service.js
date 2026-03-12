@@ -6,6 +6,26 @@ function createError(message, statusCode) {
   return error;
 }
 
+function mapPersistenceError(error) {
+  if (!error) {
+    return createError("Internal server error", 500);
+  }
+
+  // MySQL foreign-key violation.
+  if (error.code === "ER_NO_REFERENCED_ROW_2" || error.errno === 1452) {
+    const message = String(error.message || "");
+    if (message.includes("`location_id`")) {
+      return createError("location_id does not exist", 400);
+    }
+    if (message.includes("`reported_by`")) {
+      return createError("Authenticated officer does not exist", 401);
+    }
+    return createError("Invalid related reference in request", 400);
+  }
+
+  return error;
+}
+
 async function registerCrime(payload) {
   const crimePayload = {
     crime_type: String(payload.crime_type || "").trim(),
@@ -30,7 +50,13 @@ async function registerCrime(payload) {
     throw createError("reported_by must be a positive integer", 400);
   }
 
-  const crimeId = await crimeRepository.createCrime(crimePayload);
+  let crimeId;
+  try {
+    crimeId = await crimeRepository.createCrime(crimePayload);
+  } catch (error) {
+    throw mapPersistenceError(error);
+  }
+
   return crimeRepository.getCrimeById(crimeId);
 }
 
@@ -96,7 +122,13 @@ async function modifyCrime(crimeId, payload) {
     throw createError("At least one field is required to update", 400);
   }
 
-  const updated = await crimeRepository.updateCrime(id, updateData);
+  let updated;
+  try {
+    updated = await crimeRepository.updateCrime(id, updateData);
+  } catch (error) {
+    throw mapPersistenceError(error);
+  }
+
   if (!updated) {
     throw createError("Crime not found", 404);
   }

@@ -1,4 +1,4 @@
-const db = require("../../core/config/db");
+const { db } = require("../../core/config/db");
 
 async function createCrime(crimeData) {
   const sql = `

@@ -8,11 +8,16 @@ function createError(message, statusCode) {
 
 async function createCrime(req, res, next) {
   try {
-    const { crime_type, description, location_id, reported_by } = req.body;
+    const { crime_type, description, location_id } = req.body;
+    const reportedBy = req.user && req.user.officer_id;
 
-    if (crime_type === undefined || description === undefined || location_id === undefined || reported_by === undefined) {
+    if (reportedBy === undefined) {
+      return next(createError("Authenticated officer is required", 401));
+    }
+
+    if (crime_type === undefined || description === undefined || location_id === undefined) {
       return next(
-        createError("crime_type, description, location_id and reported_by are required", 400)
+        createError("crime_type, description and location_id are required", 400)
       );
     }
 
@@ -20,7 +25,7 @@ async function createCrime(req, res, next) {
       crime_type,
       description,
       location_id,
-      reported_by,
+      reported_by: reportedBy,
     });
 
     return res.status(201).json({

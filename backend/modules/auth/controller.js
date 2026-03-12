@@ -1,19 +1,50 @@
-const authService = require("./service");
-const { success } = require("../../core/utils/response");
+const service = require("./service");
+
+async function register(req, res, next) {
+  try {
+
+    const body = req.body || {};
+
+    const result = await service.registerOfficer({
+      name: body.name,
+      email: body.email,
+      password: body.password,
+      role: body.role
+    });
+
+    return res.status(201).json({
+      success: true,
+      data: result
+    });
+
+  } catch (error) {
+    return next(error);
+  }
+}
 
 async function login(req, res, next) {
   try {
-    const data = await authService.login(req.body);
-    return success(res, {
-      statusCode: 200,
-      message: "Login successful",
-      data,
+
+    const body = req.body || {};
+    const email = body.email;
+    const password = body.password;
+
+    const result = await service.loginOfficer({
+      email,
+      password
     });
+
+    return res.json({
+      success: true,
+      data: result
+    });
+
   } catch (error) {
     return next(error);
   }
 }
 
 module.exports = {
+  register,
   login,
 };

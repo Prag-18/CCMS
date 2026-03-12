@@ -1,35 +1,26 @@
-const { query } = require("../../core/config/db");
+const { db } = require("../../core/config/db");
 
-async function findOfficerByIdentifier(identifier) {
-  const sql = `
-    SELECT
-      officer_id AS officerId,
-      full_name AS fullName,
-      email,
-      badge_number AS badgeNumber,
-      role,
-      station_id AS stationId,
-      password_hash AS passwordHash,
-      is_active AS isActive
-    FROM Officer
-    WHERE (email = ? OR badge_number = ?)
-    LIMIT 1
-  `;
-
-  const [rows] = await query(sql, [identifier, identifier]);
-  return rows[0] || null;
+async function findOfficerByEmail(email) {
+  const [rows] = await db.query(
+    "SELECT * FROM Officer WHERE email = ?",
+    [email]
+  );
+  return rows[0];
 }
 
-async function updateLastLogin(officerId) {
-  const sql = `
-    UPDATE Officer
-    SET last_login_at = NOW()
-    WHERE officer_id = ?
-  `;
-  await query(sql, [officerId]);
+async function createOfficer(data) {
+  const { name, email, password_hash, role } = data;
+
+  const [result] = await db.query(
+    `INSERT INTO Officer (name, email, password_hash, role)
+     VALUES (?, ?, ?, ?)`,
+    [name, email, password_hash, role]
+  );
+
+  return result.insertId;
 }
 
 module.exports = {
-  findOfficerByIdentifier,
-  updateLastLogin,
+  findOfficerByEmail,
+  createOfficer,
 };
