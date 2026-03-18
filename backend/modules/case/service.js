@@ -93,6 +93,34 @@ async function getCases(filters) {
   return { items };
 }
 
+async function getCaseById(caseId) {
+  const id = Number(caseId);
+  if (!Number.isFinite(id) || id <= 0) {
+    throw createError("Invalid case id", 400);
+  }
+
+  const existing = await caseRepository.findById(id);
+  if (!existing) {
+    throw createError("Case not found", 404);
+  }
+
+  const timeline = await caseRepository.findTimeline(id);
+  return { ...existing, timeline };
+}
+
+async function getTimeline(caseId) {
+  const id = Number(caseId);
+  if (!Number.isFinite(id) || id <= 0) {
+    throw createError("Invalid case id", 400);
+  }
+
+  return caseRepository.findTimeline(id);
+}
+
+async function getRecentTimeline(limit) {
+  return caseRepository.findRecentTimeline(limit);
+}
+
 async function updateCase(caseId, payload, actor) {
   const actorOfficerId = resolveActorOfficerId(actor);
 
@@ -134,5 +162,8 @@ async function updateCase(caseId, payload, actor) {
 module.exports = {
   createCase,
   getCases,
+  getCaseById,
+  getTimeline,
+  getRecentTimeline,
   updateCase,
 };

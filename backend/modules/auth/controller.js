@@ -44,7 +44,22 @@ async function login(req, res, next) {
   }
 }
 
+async function getOfficers(_req, res, next) {
+  try {
+    const officers = await service.fetchOfficers();
+    return res.status(200).json({
+      success: true,
+      data: {
+        items: officers,
+      },
+    });
+  } catch (error) {
+    return next(error);
+  }
+}
+
 module.exports = {
   register,
   login,
+  getOfficers,
 };

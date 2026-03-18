@@ -7,6 +7,7 @@ const criminalRoutes = require("../modules/criminal/criminal.routes");
 const victimRoutes = require("../modules/victim/routes");
 const evidenceRoutes = require("../modules/evidence/routes");
 const analyticsRoutes = require("../modules/analytics/routes");
+const userRoutes = require("../modules/user/routes");
  
  
 const router = express.Router();
@@ -18,6 +19,7 @@ router.use("/cases", caseRoutes);
 router.use("/criminals", criminalRoutes);
 router.use("/victims", victimRoutes);
 router.use("/analytics", analyticsRoutes);
+router.use("/", userRoutes);
 router.use("/", evidenceRoutes);
 
 module.exports = router;

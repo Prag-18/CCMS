@@ -1,50 +1,39 @@
-import Layout from "../components/Layout";
-import StatCard from "../components/StatCard";
+export default function CaseTable({ items = [], cases = [] }) {
+  const rows = Array.isArray(cases) && cases.length ? cases : items;
 
-export default function Dashboard(){
+  if (!rows.length) {
+    return (
+      <div className="rounded-xl border border-dashed border-slate-300 bg-white p-6 text-sm text-slate-500">
+        No cases found.
+      </div>
+    );
+  }
 
-return(
+  return (
+    <div className="overflow-x-auto rounded-xl bg-white shadow-sm">
+      <table className="min-w-full text-sm">
+        <thead className="bg-slate-50 text-left text-slate-600">
+          <tr>
+            <th className="px-4 py-3 font-semibold">Case Number</th>
+            <th className="px-4 py-3 font-semibold">Status</th>
+            <th className="px-4 py-3 font-semibold">Priority</th>
+            <th className="px-4 py-3 font-semibold">Created</th>
+          </tr>
+        </thead>
 
-<Layout>
-
-<h2 className="text-2xl font-semibold mb-6">
-Dashboard Overview
-</h2>
-
-<div className="grid grid-cols-4 gap-6 mb-8">
-
-<StatCard
-title="Active Cases"
-value="143"
-subtitle="+12 from last month"
-color="bg-blue-200"
-/>
-
-<StatCard
-title="Pending Review"
-value="28"
-subtitle="Requires attention"
-color="bg-orange-200"
-/>
-
-<StatCard
-title="Resolved Cases"
-value="892"
-subtitle="88% resolution rate"
-color="bg-green-200"
-/>
-
-<StatCard
-title="Critical Priority"
-value="7"
-subtitle="Immediate action needed"
-color="bg-red-200"
-/>
-
-</div>
-
-</Layout>
-
-)
-
+        <tbody>
+          {rows.map((item) => (
+            <tr key={item.caseId || item.caseNumber} className="border-t border-slate-100">
+              <td className="px-4 py-3 text-slate-900">{item.caseNumber || "-"}</td>
+              <td className="px-4 py-3 text-slate-700">{item.status || "-"}</td>
+              <td className="px-4 py-3 text-slate-700">{item.priority || "-"}</td>
+              <td className="px-4 py-3 text-slate-700">
+                {item.createdAt ? new Date(item.createdAt).toLocaleDateString() : "-"}
+              </td>
+            </tr>
+          ))}
+        </tbody>
+      </table>
+    </div>
+  );
 }

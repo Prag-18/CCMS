@@ -168,12 +168,57 @@ async function findTimeline(caseId) {
   return rows;
 }
 
+async function findRecentTimeline(limit = 10) {
+  const safeLimit = Number.isFinite(Number(limit)) && Number(limit) > 0
+    ? Number(limit)
+    : 10;
+
+  const sql = `
+    SELECT
+      ca.case_activity_id AS caseActivityId,
+      ca.case_id AS caseId,
+      cf.case_number AS caseNumber,
+      ca.activity_type AS activityType,
+      ca.notes,
+      ca.actor_officer_id AS actorOfficerId,
+      ca.created_at AS createdAt
+    FROM CaseActivity ca
+    LEFT JOIN CaseFile cf ON cf.case_id = ca.case_id
+    ORDER BY ca.created_at DESC
+    LIMIT ${safeLimit}
+  `;
+
+  const [rows] = await db.query(sql);
+  return rows;
+}
+
+async function addCaseActivityEntry(payload) {
+  const sql = `
+    INSERT INTO CaseActivity (
+      case_id,
+      activity_type,
+      notes,
+      actor_officer_id
+    )
+    VALUES (?, ?, ?, ?)
+  `;
+
+  await db.query(sql, [
+    payload.caseId,
+    payload.activityType,
+    payload.notes,
+    payload.actorOfficerId,
+  ]);
+}
+
 module.exports = {
   createCase,
   addCaseActivity,
+  addCaseActivityEntry,
   findAll,
   findById,
   crimeExists,
   updateCase,
   findTimeline,
+  findRecentTimeline,
 };

@@ -20,7 +20,22 @@ async function createOfficer(data) {
   return result.insertId;
 }
 
+async function findAllOfficers() {
+  const [rows] = await db.query(
+    `SELECT
+      officer_id AS officerId,
+      name,
+      email,
+      role
+    FROM Officer
+    ORDER BY name ASC`
+  );
+
+  return rows;
+}
+
 module.exports = {
   findOfficerByEmail,
   createOfficer,
+  findAllOfficers,
 };

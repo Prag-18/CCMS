@@ -78,9 +78,31 @@ async function findByCaseId(caseId) {
   return rows;
 }
 
+async function findAll() {
+  const sql = `
+    SELECT
+      evidence_id AS evidenceId,
+      case_id AS caseId,
+      evidence_type AS evidenceType,
+      description,
+      file_name AS fileName,
+      file_path AS filePath,
+      mime_type AS mimeType,
+      file_size AS fileSize,
+      uploaded_by_officer_id AS uploadedByOfficerId,
+      created_at AS createdAt
+    FROM Evidence
+    ORDER BY created_at DESC
+  `;
+
+  const [rows] = await query(sql);
+  return rows;
+}
+
 module.exports = {
   caseExists,
   createEvidence,
   findById,
   findByCaseId,
+  findAll,
 };

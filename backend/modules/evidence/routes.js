@@ -33,9 +33,15 @@ const upload = multer({
 router.post(
   "/evidence",
   authMiddleware,
-  roleMiddleware("ADMIN", "OFFICER", "INVESTIGATOR"),
+  roleMiddleware("ADMIN", "OFFICER"),
   upload.single("file"),
   evidenceController.uploadEvidence
+);
+
+router.get(
+  "/evidence",
+  authMiddleware,
+  evidenceController.getEvidence
 );
 
 router.get(

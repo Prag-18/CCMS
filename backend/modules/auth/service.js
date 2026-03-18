@@ -117,7 +117,12 @@ async function loginOfficer(data = {}) {
   }
 }
 
+async function fetchOfficers() {
+  return repository.findAllOfficers();
+}
+
 module.exports = {
   registerOfficer,
   loginOfficer,
+  fetchOfficers,
 };

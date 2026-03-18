@@ -1,4 +1,5 @@
 const evidenceRepository = require("./repository");
+const caseRepository = require("../case/repository");
 
 function createError(message, statusCode) {
   const error = new Error(message);
@@ -29,8 +30,22 @@ async function uploadEvidence(payload, file, actor) {
     filePath: file.path,
     mimeType: file.mimetype,
     fileSize: file.size,
-    uploadedByOfficerId: actor.officerId || null,
+    uploadedByOfficerId: actor.officer_id || actor.officerId || null,
   });
+
+  const actorOfficerId = actor.officer_id || actor.officerId || null;
+  if (actorOfficerId) {
+    try {
+      await caseRepository.addCaseActivityEntry({
+        caseId,
+        activityType: "EVIDENCE_UPLOADED",
+        notes: payload.activityNote || `Evidence uploaded: ${file.originalname}`,
+        actorOfficerId,
+      });
+    } catch {
+      // Best effort logging to keep evidence upload resilient.
+    }
+  }
 
   return evidenceRepository.findById(evidenceId);
 }
@@ -45,7 +60,13 @@ async function getCaseEvidence(caseId) {
   return { items };
 }
 
+async function getEvidence() {
+  const items = await evidenceRepository.findAll();
+  return { items };
+}
+
 module.exports = {
   uploadEvidence,
   getCaseEvidence,
+  getEvidence,
 };

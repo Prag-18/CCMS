@@ -26,7 +26,20 @@ async function getCaseEvidence(req, res, next) {
   }
 }
 
+async function getEvidence(_req, res, next) {
+  try {
+    const data = await evidenceService.getEvidence();
+    return success(res, {
+      message: "Evidence fetched successfully",
+      data,
+    });
+  } catch (error) {
+    return next(error);
+  }
+}
+
 module.exports = {
   uploadEvidence,
   getCaseEvidence,
+  getEvidence,
 };

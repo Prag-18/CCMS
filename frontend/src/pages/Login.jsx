@@ -8,20 +8,30 @@ function Login() {
   const { login } = useAuth();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [error, setError] = useState("");
 
   const handleSubmit = async (event) => {
     event.preventDefault();
+    setError("");
 
     try {
-      const response = await api.post("/auth/login", { email, password });
-      const token = response?.data?.data?.token;
+      const res = await api.post("/auth/login", { email, password });
+      const token = res?.data?.data?.token;
+      const officer = res?.data?.data?.officer;
 
       if (token) {
-        login(token);
+        localStorage.setItem("token", token);
+        localStorage.setItem("user", JSON.stringify(officer || {}));
+        login({
+          token,
+          officer: officer || null,
+        });
         navigate("/");
+      } else {
+        setError("Login failed. Token not received.");
       }
-    } catch (_error) {
-      // scaffold
+    } catch (err) {
+      setError(err?.response?.data?.message || "Login failed. Please check your credentials.");
     }
   };
 
@@ -32,6 +42,7 @@ function Login() {
         className="grid w-full max-w-sm gap-3 rounded-xl border border-slate-200 bg-white p-5"
       >
         <h2 className="text-xl font-semibold text-slate-900">Login</h2>
+        {error ? <p className="text-sm text-red-600">{error}</p> : null}
         <input
           className="rounded-md border border-slate-300 px-3 py-2"
           type="email"

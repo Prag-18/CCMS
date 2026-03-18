@@ -1,32 +1,41 @@
-import {useState} from "react";
+import { useState } from "react";
 import api from "../services/api";
+import { handleUnauthorized } from "../utils/authError";
 
-export default function VictimForm(){
+export default function VictimForm() {
+  const [name, setName] = useState("");
+  const [error, setError] = useState("");
 
-const [name,setName]=useState("");
+  const submit = async (event) => {
+    event.preventDefault();
 
-const submit= async(e)=>{
+    try {
+      setError("");
+      await api.post("/victims", { fullName: name });
+      setName("");
+    } catch (err) {
+      if (handleUnauthorized(err)) {
+        return;
+      }
 
-e.preventDefault();
+      setError(err?.response?.data?.message || "Failed to add victim.");
+    }
+  };
 
-await api.post("/victims",{fullName:name});
+  return (
+    <form onSubmit={submit} className="space-y-3">
+      {error ? <p className="text-sm text-red-600">{error}</p> : null}
 
-};
+      <input
+        placeholder="Victim Name"
+        className="border p-2"
+        value={name}
+        onChange={(event) => setName(event.target.value)}
+      />
 
-return(
-
-<form onSubmit={submit}>
-
-<input
-placeholder="Victim Name"
-className="border p-2"
-onChange={(e)=>setName(e.target.value)}/>
-
-<button className="bg-green-500 text-white p-2">
-Add Victim
-</button>
-
-</form>
-
-)
+      <button className="bg-green-500 text-white p-2">
+        Add Victim
+      </button>
+    </form>
+  );
 }
