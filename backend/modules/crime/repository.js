@@ -5,18 +5,16 @@ async function createCrime(crimeData) {
     INSERT INTO Crime (
       crime_type,
       description,
-      date_reported,
-      location_id,
-      reported_by
+      reported_at,
+      location_id
     )
-    VALUES (?, ?, NOW(), ?, ?)
+    VALUES (?, ?, NOW(), ?)
   `;
 
-  const [result] = await db.execute(sql, [
+  const [result] = await db.query(sql, [
     crimeData.crime_type,
     crimeData.description,
     crimeData.location_id,
-    crimeData.reported_by,
   ]);
 
   return result.insertId;
@@ -28,14 +26,13 @@ async function getAllCrimes() {
       crime_id,
       crime_type,
       description,
-      date_reported,
-      location_id,
-      reported_by
+      reported_at,
+      location_id
     FROM Crime
-    ORDER BY date_reported DESC
+    ORDER BY reported_at DESC
   `;
 
-  const [rows] = await db.execute(sql);
+  const [rows] = await db.query(sql);
   return rows;
 }
 
@@ -45,15 +42,14 @@ async function getCrimeById(crimeId) {
       crime_id,
       crime_type,
       description,
-      date_reported,
-      location_id,
-      reported_by
+      reported_at,
+      location_id
     FROM Crime
     WHERE crime_id = ?
     LIMIT 1
   `;
 
-  const [rows] = await db.execute(sql, [crimeId]);
+  const [rows] = await db.query(sql, [crimeId]);
   return rows[0] || null;
 }
 
@@ -76,11 +72,6 @@ async function updateCrime(crimeId, updateData) {
     values.push(updateData.location_id);
   }
 
-  if (updateData.reported_by !== undefined) {
-    fields.push("reported_by = ?");
-    values.push(updateData.reported_by);
-  }
-
   if (fields.length === 0) {
     return false;
   }
@@ -92,7 +83,7 @@ async function updateCrime(crimeId, updateData) {
   `;
 
   values.push(crimeId);
-  const [result] = await db.execute(sql, values);
+  const [result] = await db.query(sql, values);
   return result.affectedRows > 0;
 }
 

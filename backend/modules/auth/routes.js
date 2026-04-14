@@ -1,11 +1,10 @@
 const express = require("express");
 const controller = require("./controller");
 const authMiddleware = require("../../core/middleware/auth.middleware");
-const roleMiddleware = require("../../core/middleware/role.middleware");
 
 const router = express.Router();
 
-router.post("/register", authMiddleware, roleMiddleware("ADMIN"), controller.register);
+router.post("/register", controller.register);
 router.post("/login", controller.login);
 router.get("/officers", authMiddleware, controller.getOfficers);
 

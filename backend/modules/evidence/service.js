@@ -1,5 +1,6 @@
 const evidenceRepository = require("./repository");
 const caseRepository = require("../case/repository");
+const notificationService = require("../notification/service");
 
 function createError(message, statusCode) {
   const error = new Error(message);
@@ -45,6 +46,16 @@ async function uploadEvidence(payload, file, actor) {
     } catch {
       // Best effort logging to keep evidence upload resilient.
     }
+  }
+
+  try {
+    const caseDetails = await caseRepository.findById(caseId);
+    await notificationService.notifyOfficer(
+      caseDetails && caseDetails.assignedOfficerId,
+      `Evidence uploaded for ${caseDetails?.caseNumber || `case #${caseId}`}`
+    );
+  } catch {
+    // Best effort notification.
   }
 
   return evidenceRepository.findById(evidenceId);

@@ -1,4 +1,4 @@
-const { query } = require("../../core/config/db");
+const { db } = require("../../core/config/db");
 
 async function createCriminal(payload) {
   const sql = `
@@ -12,7 +12,7 @@ async function createCriminal(payload) {
     VALUES (?, ?, ?, ?, ?)
   `;
 
-  const [result] = await query(sql, [
+  const [result] = await db.query(sql, [
     payload.fullName,
     payload.aliasName,
     payload.age,
@@ -36,7 +36,7 @@ async function findAll() {
     FROM Criminal
     ORDER BY created_at DESC
   `;
-  const [rows] = await query(sql);
+  const [rows] = await db.query(sql);
   return rows;
 }
 
@@ -53,7 +53,7 @@ async function findHistoryByCriminalId(criminalId) {
     WHERE cc.criminal_id = ?
     ORDER BY c.reported_at DESC
   `;
-  const [rows] = await query(sql, [criminalId]);
+  const [rows] = await db.query(sql, [criminalId]);
   return rows;
 }
 
@@ -71,7 +71,7 @@ async function findById(criminalId) {
     WHERE criminal_id = ?
     LIMIT 1
   `;
-  const [rows] = await query(sql, [criminalId]);
+  const [rows] = await db.query(sql, [criminalId]);
   return rows[0] || null;
 }
 

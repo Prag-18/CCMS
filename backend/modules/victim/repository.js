@@ -1,4 +1,4 @@
-const { query } = require("../../core/config/db");
+const { db } = require("../../core/config/db");
 
 async function createVictim(connection, payload) {
   const sql = `
@@ -46,7 +46,7 @@ async function findById(victimId) {
     LIMIT 1
   `;
 
-  const [rows] = await query(sql, [victimId]);
+  const [rows] = await db.query(sql, [victimId]);
   return rows[0] || null;
 }
 
@@ -63,7 +63,7 @@ async function findAll() {
     FROM Victim
     ORDER BY created_at DESC
   `;
-  const [rows] = await query(sql);
+  const [rows] = await db.query(sql);
   return rows;
 }
 

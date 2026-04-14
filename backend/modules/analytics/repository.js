@@ -1,4 +1,4 @@
-const { query } = require("../../core/config/db");
+const { db } = require("../../core/config/db");
 
 async function getCrimeTrends(filters) {
   const params = [];
@@ -31,7 +31,7 @@ async function getCrimeTrends(filters) {
     ORDER BY period ASC
   `;
 
-  const [rows] = await query(sql, params);
+  const [rows] = await db.query(sql, params);
   return rows;
 }
 
@@ -65,7 +65,7 @@ async function getCrimeTypeDistribution(filters) {
     ORDER BY total DESC
   `;
 
-  const [rows] = await query(sql, params);
+  const [rows] = await db.query(sql, params);
   return rows;
 }
 
@@ -110,7 +110,7 @@ async function getHotspots(filters) {
     LIMIT ?
   `;
 
-  const [rows] = await query(sql, [...params, minCount, limit]);
+  const [rows] = await db.query(sql, [...params, minCount, limit]);
   return rows;
 }
 

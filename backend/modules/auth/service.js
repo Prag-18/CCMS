@@ -121,8 +121,14 @@ async function fetchOfficers() {
   return repository.findAllOfficers();
 }
 
+async function hasRegisteredOfficers() {
+  const total = await repository.countOfficers();
+  return total > 0;
+}
+
 module.exports = {
   registerOfficer,
   loginOfficer,
   fetchOfficers,
+  hasRegisteredOfficers,
 };

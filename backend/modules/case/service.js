@@ -1,5 +1,6 @@
 const { withTransaction } = require("../../core/config/db");
 const caseRepository = require("./repository");
+const notificationService = require("../notification/service");
 
 function createError(message, statusCode) {
   const error = new Error(message);
@@ -85,6 +86,16 @@ async function createCase(payload, actor) {
 
   const created = await caseRepository.findById(caseId);
   const timeline = await caseRepository.findTimeline(caseId);
+
+  try {
+    await notificationService.notifyOfficer(
+      created.assignedOfficerId,
+      `New case assigned: ${created.caseNumber}`
+    );
+  } catch {
+    // Best effort notification.
+  }
+
   return { ...created, timeline };
 }
 
@@ -156,6 +167,16 @@ async function updateCase(caseId, payload, actor) {
 
   const updated = await caseRepository.findById(id);
   const timeline = await caseRepository.findTimeline(id);
+
+  try {
+    await notificationService.notifyOfficer(
+      updated.assignedOfficerId,
+      `Case updated: ${updated.caseNumber}`
+    );
+  } catch {
+    // Best effort notification.
+  }
+
   return { ...updated, timeline };
 }
 

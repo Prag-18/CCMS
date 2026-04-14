@@ -34,8 +34,17 @@ async function findAllOfficers() {
   return rows;
 }
 
+async function countOfficers() {
+  const [rows] = await db.query(
+    "SELECT COUNT(*) AS total FROM Officer"
+  );
+
+  return Number(rows[0]?.total || 0);
+}
+
 module.exports = {
   findOfficerByEmail,
   createOfficer,
   findAllOfficers,
+  countOfficers,
 };
