@@ -63,6 +63,15 @@ export default function Cases() {
   const [detailsLoading,      setDetailsLoading]      = useState(false);
   const [detailsError,        setDetailsError]        = useState("");
 
+  // New Case modal state
+  const [newCaseOpen,    setNewCaseOpen]    = useState(false);
+  const [ncTitle,        setNcTitle]        = useState("");
+  const [ncCrimeId,      setNcCrimeId]      = useState("");
+  const [ncPriority,     setNcPriority]     = useState("MEDIUM");
+  const [ncStatus,       setNcStatus]       = useState("OPEN");
+  const [ncSubmitting,   setNcSubmitting]   = useState(false);
+  const [ncError,        setNcError]        = useState("");
+
   const fetchCases = useCallback(async (showLoader = true) => {
     try {
       if (showLoader) setLoading(true);
@@ -120,6 +129,34 @@ export default function Cases() {
 
   const closeModal = () => { setSelectedCaseId(null); setSelectedCaseDetails(null); setDetailsError(""); };
 
+  const openNewCase = () => {
+    setNcTitle(""); setNcCrimeId(""); setNcPriority("MEDIUM"); setNcStatus("OPEN"); setNcError("");
+    setNewCaseOpen(true);
+  };
+  const closeNewCase = () => setNewCaseOpen(false);
+
+  const submitNewCase = async (e) => {
+    e.preventDefault();
+    const crimeId = Number(ncCrimeId);
+    if (!crimeId || crimeId <= 0) { setNcError("Crime ID must be a positive number."); return; }
+    try {
+      setNcSubmitting(true); setNcError("");
+      await api.post("/cases", {
+        crimeId,
+        title: ncTitle.trim() || "Untitled Case",
+        priority: ncPriority,
+        status: ncStatus,
+      });
+      closeNewCase();
+      await fetchCases(false);
+    } catch (err) {
+      if (handleUnauthorized(err)) return;
+      setNcError(err?.response?.data?.message || "Failed to create case.");
+    } finally {
+      setNcSubmitting(false);
+    }
+  };
+
   const refreshIfOpen = async (caseId) => {
     if (!selectedCaseId || Number(selectedCaseId) !== Number(caseId)) return;
     try { const res = await api.get(`/cases/${caseId}`); setSelectedCaseDetails(res?.data?.data || null); } catch { /* silent */ }
@@ -162,7 +199,7 @@ export default function Cases() {
             </p>
           </div>
           {user && (
-            <button className="btn-primary flex items-center gap-2">
+            <button id="new-case-btn" onClick={openNewCase} className="btn-primary flex items-center gap-2">
               <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
                 <line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/>
               </svg>
@@ -364,6 +401,117 @@ export default function Cases() {
                 <p className="text-sm" style={{ color: "var(--text-secondary)" }}>No case details found.</p>
               )}
             </div>
+          </div>
+        </div>
+      )}
+
+      {/* New Case Modal */}
+      {newCaseOpen && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center px-4"
+          style={{ background: "rgba(0,0,0,0.7)", backdropFilter: "blur(6px)" }}
+          onClick={(e) => e.target === e.currentTarget && closeNewCase()}>
+          <div className="w-full max-w-md rounded-2xl fade-in"
+            style={{ background: "var(--card-bg)", border: "1px solid rgba(255,255,255,0.08)", boxShadow: "0 30px 60px rgba(0,0,0,0.6)" }}>
+            {/* Modal Header */}
+            <div className="flex items-center justify-between p-5" style={{ borderBottom: "1px solid rgba(255,255,255,0.07)" }}>
+              <div className="flex items-center gap-3">
+                <div className="w-9 h-9 rounded-xl flex items-center justify-center" style={{ background: "rgba(59,130,246,0.15)" }}>
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#60a5fa" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                    <line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/>
+                  </svg>
+                </div>
+                <h3 className="font-bold text-sm" style={{ color: "var(--text-primary)" }}>Create New Case</h3>
+              </div>
+              <button onClick={closeNewCase}
+                className="w-8 h-8 rounded-xl flex items-center justify-center"
+                style={{ background: "rgba(255,255,255,0.05)", color: "var(--text-secondary)" }}>
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                  <line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/>
+                </svg>
+              </button>
+            </div>
+
+            <form onSubmit={submitNewCase} className="p-5 space-y-4">
+              {ncError && (
+                <div className="px-4 py-3 rounded-xl text-xs"
+                  style={{ background: "rgba(239,68,68,0.08)", border: "1px solid rgba(239,68,68,0.2)", color: "#fca5a5" }}>
+                  {ncError}
+                </div>
+              )}
+
+              {/* Title */}
+              <div>
+                <label className="block text-xs font-semibold uppercase tracking-wider mb-1.5" style={{ color: "var(--text-secondary)" }}>Title</label>
+                <input
+                  value={ncTitle}
+                  onChange={(e) => setNcTitle(e.target.value)}
+                  placeholder="e.g. Robbery Investigation"
+                  className="w-full px-3 py-2.5 rounded-xl text-sm outline-none"
+                  style={{ background: "rgba(255,255,255,0.04)", border: "1px solid rgba(255,255,255,0.1)", color: "var(--text-primary)" }}
+                  onFocus={(e) => e.target.style.borderColor = "rgba(59,130,246,0.5)"}
+                  onBlur={(e) => e.target.style.borderColor = "rgba(255,255,255,0.1)"}
+                />
+              </div>
+
+              {/* Crime ID */}
+              <div>
+                <label className="block text-xs font-semibold uppercase tracking-wider mb-1.5" style={{ color: "var(--text-secondary)" }}>Crime ID <span style={{ color: "#f87171" }}>*</span></label>
+                <input
+                  type="number"
+                  min="1"
+                  required
+                  value={ncCrimeId}
+                  onChange={(e) => setNcCrimeId(e.target.value)}
+                  placeholder="e.g. 3"
+                  className="w-full px-3 py-2.5 rounded-xl text-sm outline-none"
+                  style={{ background: "rgba(255,255,255,0.04)", border: "1px solid rgba(255,255,255,0.1)", color: "var(--text-primary)" }}
+                  onFocus={(e) => e.target.style.borderColor = "rgba(59,130,246,0.5)"}
+                  onBlur={(e) => e.target.style.borderColor = "rgba(255,255,255,0.1)"}
+                />
+              </div>
+
+              <div className="grid grid-cols-2 gap-3">
+                {/* Priority */}
+                <div>
+                  <label className="block text-xs font-semibold uppercase tracking-wider mb-1.5" style={{ color: "var(--text-secondary)" }}>Priority</label>
+                  <select value={ncPriority} onChange={(e) => setNcPriority(e.target.value)}
+                    className="w-full px-3 py-2.5 rounded-xl text-sm outline-none"
+                    style={{ background: "rgba(255,255,255,0.04)", border: "1px solid rgba(255,255,255,0.1)", color: "var(--text-primary)", cursor: "pointer" }}>
+                    <option value="LOW"    style={{ background: "#0b1120" }}>LOW</option>
+                    <option value="MEDIUM" style={{ background: "#0b1120" }}>MEDIUM</option>
+                    <option value="HIGH"   style={{ background: "#0b1120" }}>HIGH</option>
+                  </select>
+                </div>
+                {/* Status */}
+                <div>
+                  <label className="block text-xs font-semibold uppercase tracking-wider mb-1.5" style={{ color: "var(--text-secondary)" }}>Status</label>
+                  <select value={ncStatus} onChange={(e) => setNcStatus(e.target.value)}
+                    className="w-full px-3 py-2.5 rounded-xl text-sm outline-none"
+                    style={{ background: "rgba(255,255,255,0.04)", border: "1px solid rgba(255,255,255,0.1)", color: "var(--text-primary)", cursor: "pointer" }}>
+                    <option value="OPEN"           style={{ background: "#0b1120" }}>OPEN</option>
+                    <option value="IN_PROGRESS"    style={{ background: "#0b1120" }}>IN PROGRESS</option>
+                    <option value="UNDER_INVESTIGATION" style={{ background: "#0b1120" }}>UNDER INVESTIGATION</option>
+                  </select>
+                </div>
+              </div>
+
+              <div className="flex gap-3 pt-1">
+                <button type="button" onClick={closeNewCase}
+                  className="flex-1 py-2.5 rounded-xl text-sm font-medium transition-all"
+                  style={{ background: "rgba(255,255,255,0.04)", border: "1px solid rgba(255,255,255,0.08)", color: "var(--text-secondary)" }}>
+                  Cancel
+                </button>
+                <button type="submit" disabled={ncSubmitting}
+                  className="flex-1 btn-primary flex items-center justify-center gap-2"
+                  style={{ opacity: ncSubmitting ? 0.6 : 1, cursor: ncSubmitting ? "not-allowed" : "pointer" }}>
+                  {ncSubmitting ? (
+                    <><svg className="animate-spin" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M21 12a9 9 0 1 1-6.219-8.56"/></svg> Creating…</>
+                  ) : (
+                    <><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg> Create Case</>
+                  )}
+                </button>
+              </div>
+            </form>
           </div>
         </div>
       )}

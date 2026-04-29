@@ -12,13 +12,11 @@ function Login() {
   const [loading, setLoading] = useState(false);
   const [showPass, setShowPass] = useState(false);
 
-  const handleSubmit = async (event) => {
-    event.preventDefault();
+  const doLogin = async (loginEmail, loginPassword) => {
     setError("");
     setLoading(true);
-
     try {
-      const res = await api.post("/auth/login", { email, password });
+      const res = await api.post("/auth/login", { email: loginEmail, password: loginPassword });
       const token = res?.data?.data?.token;
       const officer = res?.data?.data?.officer;
 
@@ -35,6 +33,17 @@ function Login() {
     } finally {
       setLoading(false);
     }
+  };
+
+  const handleSubmit = async (event) => {
+    event.preventDefault();
+    await doLogin(email, password);
+  };
+
+  const handleQuickAdminLogin = async () => {
+    setEmail("admin@ccms.gov");
+    setPassword("123456");
+    await doLogin("admin@ccms.gov", "123456");
   };
 
   return (
@@ -214,6 +223,29 @@ function Login() {
                 Authenticating...
               </span>
             ) : "Sign In"}
+          </button>
+
+          {/* Quick Admin Login */}
+          <button
+            id="quick-admin-login"
+            type="button"
+            onClick={handleQuickAdminLogin}
+            disabled={loading}
+            className="w-full py-2.5 rounded-xl font-semibold text-sm transition-all flex items-center justify-center gap-2"
+            style={{
+              background: "rgba(124,58,237,0.12)",
+              border: "1px dashed rgba(124,58,237,0.4)",
+              color: "#a78bfa",
+              cursor: loading ? "not-allowed" : "pointer",
+              opacity: loading ? 0.5 : 1,
+            }}
+            onMouseEnter={(e) => { if (!loading) e.currentTarget.style.background = "rgba(124,58,237,0.22)"; }}
+            onMouseLeave={(e) => { e.currentTarget.style.background = "rgba(124,58,237,0.12)"; }}
+          >
+            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+              <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/>
+            </svg>
+            Quick Admin Login
           </button>
 
           <p className="text-center text-xs" style={{ color: "rgba(148,163,184,0.5)" }}>

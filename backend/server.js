@@ -9,6 +9,20 @@ async function startServer() {
 
   const server = http.createServer(app);
 
+  server.on("error", (err) => {
+    if (err.code === "EADDRINUSE") {
+      logger.error(
+        `Port ${env.port} is already in use.\n` +
+        `  → Kill the process with:  netstat -ano | findstr :${env.port}\n` +
+        `    then:                    taskkill /PID <PID> /F\n` +
+        `  → Or just run:            npm run kill-port`
+      );
+    } else {
+      logger.error("Server error", { message: err.message });
+    }
+    process.exit(1);
+  });
+
   server.listen(env.port, () => {
     logger.info(`CCMS backend listening on port ${env.port}`);
   });

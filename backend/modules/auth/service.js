@@ -49,7 +49,7 @@ async function registerOfficer(data = {}) {
       throw createHttpError(409, "Officer already exists");
     }
 
-    const hashedPassword = await bcrypt.hash(password, 10);
+    const hashedPassword = password; // DEV: plain text, no hashing
 
     const officerId = await repository.createOfficer({
       name,
@@ -86,7 +86,8 @@ async function loginOfficer(data = {}) {
       throw createHttpError(401, "Invalid email or password");
     }
 
-    const validPassword = await bcrypt.compare(password, officer.password_hash);
+    // DEV: plain text comparison (no bcrypt)
+    const validPassword = password === officer.password_hash;
 
     if (!validPassword) {
       throw createHttpError(401, "Invalid email or password");

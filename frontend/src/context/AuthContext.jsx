@@ -3,18 +3,21 @@ import { createContext, useContext, useMemo, useState } from "react";
 
 const AuthContext = createContext(null);
 
-function readStoredUser() {
-  try {
-    const raw = localStorage.getItem("user");
-    return raw ? JSON.parse(raw) : null;
-  } catch {
-    return null;
-  }
+// DEV: permanent admin session — no login required
+const DEV_USER = { id: 1, name: "Admin User", role: "ADMIN" };
+const DEV_TOKEN = "dev-bypass-token";
+
+// Seed localStorage immediately so axios interceptors always attach the token
+if (!localStorage.getItem("token")) {
+  localStorage.setItem("token", DEV_TOKEN);
+}
+if (!localStorage.getItem("user")) {
+  localStorage.setItem("user", JSON.stringify(DEV_USER));
 }
 
 export function AuthProvider({ children }) {
-  const [user, setUser] = useState(readStoredUser());
-  const [token, setToken] = useState(localStorage.getItem("token"));
+  const [user, setUser] = useState(DEV_USER);
+  const [token, setToken] = useState(DEV_TOKEN);
 
   const login = (data) => {
     // Backward compatible: login(tokenString)

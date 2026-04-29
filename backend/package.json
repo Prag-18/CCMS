@@ -6,6 +6,8 @@
   "scripts": {
     "start": "node server.js",
     "dev": "nodemon server.js",
+    "kill-port": "for /f \"tokens=5\" %a in ('netstat -ano ^| findstr :5000') do taskkill /PID %a /F",
+    "restart": "npm run kill-port & timeout /t 2 & npm start",
     "test": "echo \"No automated tests configured yet\""
   },
   "keywords": [],

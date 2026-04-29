@@ -17,35 +17,34 @@ TRUNCATE TABLE Officer;
 SET FOREIGN_KEY_CHECKS = 1;
 
 -- ================================================
--- 1. OFFICERS (21 entries — hashed pw = "password123")
+-- 1. OFFICERS (21 entries)
+--    Admin  password : 123456
+--    Others password : password123
 -- ================================================
+-- bcrypt hash for '123456'      : $2b$10$n.Fc.ULCV4/gI.Xq3XbkMeIjJqLKqk/5BtjRFLezYHH5.IiWyxIa
+-- bcrypt hash for 'password123' : $2b$10$EixZaYVK1fsbw1ZfbX3OXePaWxn96p36WQoeG6Lruj3vjPGga31lW
 INSERT INTO Officer (name, email, password_hash, role) VALUES
-('Admin User',        'admin@ccms.gov',       '$2b$10$YourHashedPwHere1111111111111111111111111111111', 'ADMIN'),
-('Ravi Kumar',        'ravi.kumar@ccms.gov',  '$2b$10$YourHashedPwHere1111111111111111111111111112', 'OFFICER'),
-('Anita Sharma',      'anita.s@ccms.gov',     '$2b$10$YourHashedPwHere1111111111111111111111111113', 'INVESTIGATOR'),
-('Deepak Verma',      'deepak.v@ccms.gov',    '$2b$10$YourHashedPwHere1111111111111111111111111114', 'OFFICER'),
-('Priya Nair',        'priya.n@ccms.gov',     '$2b$10$YourHashedPwHere1111111111111111111111111115', 'INVESTIGATOR'),
-('Suresh Reddy',      'suresh.r@ccms.gov',    '$2b$10$YourHashedPwHere1111111111111111111111111116', 'OFFICER'),
-('Kavitha Menon',     'kavitha.m@ccms.gov',   '$2b$10$YourHashedPwHere1111111111111111111111111117', 'OFFICER'),
-('Amit Singh',        'amit.s@ccms.gov',      '$2b$10$YourHashedPwHere1111111111111111111111111118', 'OFFICER'),
-('Neha Gupta',        'neha.g@ccms.gov',      '$2b$10$YourHashedPwHere1111111111111111111111111119', 'INVESTIGATOR'),
-('Vijay Patel',       'vijay.p@ccms.gov',     '$2b$10$YourHashedPwHere111111111111111111111111111A', 'OFFICER'),
-('Sunita Rao',        'sunita.r@ccms.gov',    '$2b$10$YourHashedPwHere111111111111111111111111111B', 'OFFICER'),
-('Manoj Tiwari',      'manoj.t@ccms.gov',     '$2b$10$YourHashedPwHere111111111111111111111111111C', 'OFFICER'),
-('Rekha Joshi',       'rekha.j@ccms.gov',     '$2b$10$YourHashedPwHere111111111111111111111111111D', 'INVESTIGATOR'),
-('Arjun Mehta',       'arjun.m@ccms.gov',     '$2b$10$YourHashedPwHere111111111111111111111111111E', 'OFFICER'),
-('Lakshmi Pillai',    'lakshmi.p@ccms.gov',   '$2b$10$YourHashedPwHere111111111111111111111111111F', 'OFFICER'),
-('Ramesh Chandra',    'ramesh.c@ccms.gov',    '$2b$10$YourHashedPwHere111111111111111111111111111G', 'OFFICER'),
-('Geeta Bose',        'geeta.b@ccms.gov',     '$2b$10$YourHashedPwHere111111111111111111111111111H', 'INVESTIGATOR'),
-('Sanjay Dubey',      'sanjay.d@ccms.gov',    '$2b$10$YourHashedPwHere111111111111111111111111111I', 'OFFICER'),
-('Meena Krishnan',    'meena.k@ccms.gov',     '$2b$10$YourHashedPwHere111111111111111111111111111J', 'OFFICER'),
-('Harish Bansal',     'harish.b@ccms.gov',    '$2b$10$YourHashedPwHere111111111111111111111111111K', 'OFFICER'),
-('Pooja Agarwal',     'pooja.a@ccms.gov',     '$2b$10$YourHashedPwHere111111111111111111111111111L', 'INVESTIGATOR');
-
--- Fix admin password to the real bcrypt hash for admin@gmail.com / 123456
-UPDATE Officer SET email='admin@gmail.com',
-  password_hash='$2b$10$n.Fc.ULCV4/gI.Xq3XbkMeIjJqLKqk/5BtjRFLezYHH5.IiWyxIa'
-WHERE officer_id = 1;
+('Admin User',        'admin@ccms.gov',       '$2b$10$n.Fc.ULCV4/gI.Xq3XbkMeIjJqLKqk/5BtjRFLezYHH5.IiWyxIa', 'ADMIN'),
+('Ravi Kumar',        'ravi.kumar@ccms.gov',  '$2b$10$EixZaYVK1fsbw1ZfbX3OXePaWxn96p36WQoeG6Lruj3vjPGga31lW', 'OFFICER'),
+('Anita Sharma',      'anita.s@ccms.gov',     '$2b$10$EixZaYVK1fsbw1ZfbX3OXePaWxn96p36WQoeG6Lruj3vjPGga31lW', 'INVESTIGATOR'),
+('Deepak Verma',      'deepak.v@ccms.gov',    '$2b$10$EixZaYVK1fsbw1ZfbX3OXePaWxn96p36WQoeG6Lruj3vjPGga31lW', 'OFFICER'),
+('Priya Nair',        'priya.n@ccms.gov',     '$2b$10$EixZaYVK1fsbw1ZfbX3OXePaWxn96p36WQoeG6Lruj3vjPGga31lW', 'INVESTIGATOR'),
+('Suresh Reddy',      'suresh.r@ccms.gov',    '$2b$10$EixZaYVK1fsbw1ZfbX3OXePaWxn96p36WQoeG6Lruj3vjPGga31lW', 'OFFICER'),
+('Kavitha Menon',     'kavitha.m@ccms.gov',   '$2b$10$EixZaYVK1fsbw1ZfbX3OXePaWxn96p36WQoeG6Lruj3vjPGga31lW', 'OFFICER'),
+('Amit Singh',        'amit.s@ccms.gov',      '$2b$10$EixZaYVK1fsbw1ZfbX3OXePaWxn96p36WQoeG6Lruj3vjPGga31lW', 'OFFICER'),
+('Neha Gupta',        'neha.g@ccms.gov',      '$2b$10$EixZaYVK1fsbw1ZfbX3OXePaWxn96p36WQoeG6Lruj3vjPGga31lW', 'INVESTIGATOR'),
+('Vijay Patel',       'vijay.p@ccms.gov',     '$2b$10$EixZaYVK1fsbw1ZfbX3OXePaWxn96p36WQoeG6Lruj3vjPGga31lW', 'OFFICER'),
+('Sunita Rao',        'sunita.r@ccms.gov',    '$2b$10$EixZaYVK1fsbw1ZfbX3OXePaWxn96p36WQoeG6Lruj3vjPGga31lW', 'OFFICER'),
+('Manoj Tiwari',      'manoj.t@ccms.gov',     '$2b$10$EixZaYVK1fsbw1ZfbX3OXePaWxn96p36WQoeG6Lruj3vjPGga31lW', 'OFFICER'),
+('Rekha Joshi',       'rekha.j@ccms.gov',     '$2b$10$EixZaYVK1fsbw1ZfbX3OXePaWxn96p36WQoeG6Lruj3vjPGga31lW', 'INVESTIGATOR'),
+('Arjun Mehta',       'arjun.m@ccms.gov',     '$2b$10$EixZaYVK1fsbw1ZfbX3OXePaWxn96p36WQoeG6Lruj3vjPGga31lW', 'OFFICER'),
+('Lakshmi Pillai',    'lakshmi.p@ccms.gov',   '$2b$10$EixZaYVK1fsbw1ZfbX3OXePaWxn96p36WQoeG6Lruj3vjPGga31lW', 'OFFICER'),
+('Ramesh Chandra',    'ramesh.c@ccms.gov',    '$2b$10$EixZaYVK1fsbw1ZfbX3OXePaWxn96p36WQoeG6Lruj3vjPGga31lW', 'OFFICER'),
+('Geeta Bose',        'geeta.b@ccms.gov',     '$2b$10$EixZaYVK1fsbw1ZfbX3OXePaWxn96p36WQoeG6Lruj3vjPGga31lW', 'INVESTIGATOR'),
+('Sanjay Dubey',      'sanjay.d@ccms.gov',    '$2b$10$EixZaYVK1fsbw1ZfbX3OXePaWxn96p36WQoeG6Lruj3vjPGga31lW', 'OFFICER'),
+('Meena Krishnan',    'meena.k@ccms.gov',     '$2b$10$EixZaYVK1fsbw1ZfbX3OXePaWxn96p36WQoeG6Lruj3vjPGga31lW', 'OFFICER'),
+('Harish Bansal',     'harish.b@ccms.gov',    '$2b$10$EixZaYVK1fsbw1ZfbX3OXePaWxn96p36WQoeG6Lruj3vjPGga31lW', 'OFFICER'),
+('Pooja Agarwal',     'pooja.a@ccms.gov',     '$2b$10$EixZaYVK1fsbw1ZfbX3OXePaWxn96p36WQoeG6Lruj3vjPGga31lW', 'INVESTIGATOR');
 
 -- ================================================
 -- 2. LOCATIONS (22 entries)
@@ -245,6 +244,20 @@ INSERT INTO Notification (officer_id, message, is_read, created_at) VALUES
 (2,  'CASE-2026-021 evidence sent to digital forensics lab.',           FALSE, '2026-03-02 10:00:00'),
 (4,  'Reminder: CASE-2026-009 court date is next week.',                TRUE,  '2026-03-12 09:00:00'),
 (6,  'SIT formed for CASE-2026-010; your attendance required Monday.',  FALSE, '2026-02-01 11:00:00');
+
+-- ================================================
+-- TEST LOGIN ACCOUNT  (run standalone if needed)
+--   Email    : pragadesh@ccms.gov
+--   Password : Admin@123
+-- ================================================
+-- bcrypt hash for 'Admin@123' = $2b$10$92IXUNpkjO0rOQ5byMi.Ye4oKoEa3Ro9llC/.og/at2.uheWG/igi
+INSERT INTO Officer (name, email, password_hash, role)
+VALUES ('Pragadesh Admin', 'pragadesh@ccms.gov',
+        '$2b$10$92IXUNpkjO0rOQ5byMi.Ye4oKoEa3Ro9llC/.og/at2.uheWG/igi',
+        'ADMIN')
+ON DUPLICATE KEY UPDATE
+  password_hash = '$2b$10$92IXUNpkjO0rOQ5byMi.Ye4oKoEa3Ro9llC/.og/at2.uheWG/igi',
+  role = 'ADMIN';
 
 SELECT 'Seed complete.' AS status,
   (SELECT COUNT(*) FROM Officer)      AS officers,
